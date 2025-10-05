@@ -1,0 +1,11 @@
+********FRONTEND*****************
+/ => dashboard
+/user => user-profile
+        1.Name
+        2.Username
+        3.email
+        4. Phone
+        5.Listed Products[to sell]
+        6. Wishlisht[to buy]
+        7. Add to Cart
+

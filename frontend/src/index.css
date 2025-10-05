@@ -1,0 +1,15 @@
+/* postcss */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+.material-symbols-outlined {
+    font-variation-settings:
+      'FILL' 0,    /* 1 for filled */
+      'wght' 400,  /* 100..700 */
+      'GRAD' 0,    /* -50..200 */
+      'opsz' 24;   /* 20..48 */
+  }
+
+  .ms-heart-filled { font-variation-settings: 'FILL' 1, 'wght' 600, 'GRAD' 0, 'opsz' 24; }
