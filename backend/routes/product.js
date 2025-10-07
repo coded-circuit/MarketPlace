@@ -1,7 +1,8 @@
 const express = require('express'); 
 const {Product} = require('../models/product');
+const { restictToLoggedInUserOnly } = require('../middlewares/auth');
 const router = express.Router();
-
+//Public Routes
 router.get('/',async (req,res)=>{
     try{
         const result = await Product.find({});
@@ -11,7 +12,31 @@ router.get('/',async (req,res)=>{
         return res.status(500).json({msg:"Error",error:err});
     }
 })
-router.post('/', async (req,res)=>{
+router.get('/:id', async (req,res)=>{
+    try{
+        const result = await Product.findById(req.params.id).populate({
+            path:'seller_id',
+            select:'name username email phone location'
+        })
+        return res.json({msg:"Product fetched successfully",data:result})
+    }
+    catch(e){
+        return res.json({msg:"Error",error:e.message})
+    }
+})
+router.get('/category/:category', async(req,res)=>{  
+    try{
+        const categoryName = req.params.category;
+        const result = await Product.find({category:categoryName})
+        .collation({locale:'en',strength:2}) //to ignore case sensitivity
+        return res.json({msg:"Products fetched successfully",data:result})
+    }
+    catch(e){
+        return res.json({msg:"error",error:e.message})
+    }
+})
+//Protected Routes
+router.post('/', restictToLoggedInUserOnly,async (req,res)=>{
     try{
         const body = req.body;
         const result = await Product.create({
@@ -31,19 +56,7 @@ router.post('/', async (req,res)=>{
         return res.json({msg:"Error",error:err.message})
     }
 })
-router.get('/:id', async (req,res)=>{
-    try{
-        const result = await Product.findById(req.params.id).populate({
-            path:'seller_id',
-            select:'name username email phone location'
-        })
-        return res.json({msg:"Product fetched successfully",data:result})
-    }
-    catch(e){
-        return res.json({msg:"Error",error:e.message})
-    }
-})
-router.patch('/:id', async(req,res)=>{
+router.patch('/:id',restictToLoggedInUserOnly, async(req,res)=>{
     try{
         const result = await Product.findByIdAndUpdate(req.params.id,req.body,{new:true});
         return res.json({msg: "Product updated"})
@@ -52,7 +65,7 @@ router.patch('/:id', async(req,res)=>{
         return res.json({msg:"error",error:e.message})
     }
 })
-router.delete('/:id', async(req,res)=>{
+router.delete('/:id',restictToLoggedInUserOnly, async(req,res)=>{
     try{
         const result = await Product.findByIdAndDelete(req.params.id);
         return res.json({msg: "Product deleted"})
@@ -61,15 +74,5 @@ router.delete('/:id', async(req,res)=>{
         return res.json({msg:"error",error:e.message})
     }
 })
-router.get('/category/:category', async(req,res)=>{  
-    try{
-        const categoryName = req.params.category;
-        const result = await Product.find({category:categoryName})
-        .collation({locale:'en',strength:2}) //to ignore case sensitivity
-        return res.json({msg:"Products fetched successfully",data:result})
-    }
-    catch(e){
-        return res.json({msg:"error",error:e.message})
-    }
-})
+
 module.exports = router;

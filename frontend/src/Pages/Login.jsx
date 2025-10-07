@@ -1,13 +1,39 @@
 import { useState } from 'react';
-import {Link} from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom';
+import { BASE_URL } from '../App';
+
 export default function Login() {
   const [username,setUsername] = useState('')
   const [password,setPassword] = useState('')
   const [errors, setErrors] = useState({});
-   const [isSubmitting, setIsSubmitting] = useState(false)
-  const handleSubmit=(e)=>{
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const Navigate = useNavigate();
+  const handleSubmit= async(e)=>{
     e.preventDefault();
+    setErrors({})
     //store username and pass, then verify it and if it is correct redirect it to Dashboard page.
+    try{
+      const res = await fetch(`${BASE_URL}/user/login`,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        credentials:'include',
+        body: JSON.stringify({username,password}),
+      });
+      const data = await res.json();
+      if(!res.ok){
+        throw new Error(data.msg|| 'Login Failed');
+      }
+      
+      setUsername("")
+      setPassword("")
+      setIsLoggedIn(true)
+      Navigate('/')
+
+    }
+    catch(err){
+      setErrors({error: err.message});
+    }
+
   }
   return (
     <div className='h-screen'>
@@ -37,7 +63,7 @@ export default function Login() {
                   htmlFor="username"
                   className="block text-sm font-medium text-secondary-700"
                 >
-                  UserName
+                  Username
                 </label>
                 <div className="mt-1">
                   <input
@@ -123,10 +149,9 @@ export default function Login() {
             <div>
               <button
                 type="submit"
-                disabled={isSubmitting}
                 className="w-full inline-flex justify-center rounded-md bg-primary-600 px-4 py-2 text-white hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
               >
-                {isSubmitting ? 'Signing in...' : 'Sign in'}
+                Sign in
               </button>
             </div>
           </form>
